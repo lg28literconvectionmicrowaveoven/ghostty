@@ -255,30 +255,40 @@ const c = @cImport({
 ///     that things like status lines continue to look aligned.
 @"adjust-cell-width": ?MetricModifier = null,
 @"adjust-cell-height": ?MetricModifier = null,
-/// Distance in pixels from the bottom of the cell to the text baseline.
+/// Distance in pixels or percentage adjustment from the bottom of the cell to the text baseline.
 /// Increase to move baseline UP, decrease to move baseline DOWN.
+/// See the notes about adjustments in `adjust-cell-width`.
 @"adjust-font-baseline": ?MetricModifier = null,
-/// Distance in pixels from the top of the cell to the top of the underline.
+/// Distance in pixels or percentage adjustment from the top of the cell to the top of the underline.
 /// Increase to move underline DOWN, decrease to move underline UP.
+/// See the notes about adjustments in `adjust-cell-width`.
 @"adjust-underline-position": ?MetricModifier = null,
 /// Thickness in pixels of the underline.
+/// See the notes about adjustments in `adjust-cell-width`.
 @"adjust-underline-thickness": ?MetricModifier = null,
-/// Distance in pixels from the top of the cell to the top of the strikethrough.
+/// Distance in pixels or percentage adjustment from the top of the cell to the top of the strikethrough.
 /// Increase to move strikethrough DOWN, decrease to move underline UP.
+/// See the notes about adjustments in `adjust-cell-width`.
 @"adjust-strikethrough-position": ?MetricModifier = null,
-/// Thickness in pixels of the strikethrough.
+/// Thickness in pixels or percentage adjustment of the strikethrough.
+/// See the notes about adjustments in `adjust-cell-width`.
 @"adjust-strikethrough-thickness": ?MetricModifier = null,
-/// Distance in pixels from the top of the cell to the top of the overline.
+/// Distance in pixels or percentage adjustment from the top of the cell to the top of the overline.
 /// Increase to move overline DOWN, decrease to move underline UP.
+/// See the notes about adjustments in `adjust-cell-width`.
 @"adjust-overline-position": ?MetricModifier = null,
-/// Thickness in pixels of the overline.
+/// Thickness in pixels or percentage adjustment of the overline.
+/// See the notes about adjustments in `adjust-cell-width`.
 @"adjust-overline-thickness": ?MetricModifier = null,
-/// Thickness in pixels of the bar cursor and outlined rect cursor.
+/// Thickness in pixels or percentage adjustment of the bar cursor and outlined rect cursor.
+/// See the notes about adjustments in `adjust-cell-width`.
 @"adjust-cursor-thickness": ?MetricModifier = null,
-/// Height in pixels of the cursor. Currently applies to all cursor types:
+/// Height in pixels or percentage adjustment of the cursor. Currently applies to all cursor types:
 /// bar, rect, and outlined rect.
+/// See the notes about adjustments in `adjust-cell-width`.
 @"adjust-cursor-height": ?MetricModifier = null,
-/// Thickness in pixels of box drawing characters.
+/// Thickness in pixels or percentage adjustment of box drawing characters.
+/// See the notes about adjustments in `adjust-cell-width`.
 @"adjust-box-thickness": ?MetricModifier = null,
 
 /// The method to use for calculating the cell width of a grapheme cluster.
@@ -769,7 +779,25 @@ class: ?[:0]const u8 = null,
 /// the documentation or using the `ghostty +list-actions` command.
 ///
 /// Trigger: `+`-separated list of keys and modifiers. Example: `ctrl+a`,
-/// `ctrl+shift+b`, `up`. Some notes:
+/// `ctrl+shift+b`, `up`.
+///
+/// Valid keys are currently only listed in the
+/// [Ghostty source code](https://github.com/ghostty-org/ghostty/blob/d6e76858164d52cff460fedc61ddf2e560912d71/src/input/key.zig#L255).
+/// This is a documentation limitation and we will improve this in the future.
+/// A common gotcha is that numeric keys are written as words: i.e. `one`,
+/// `two`, `three`, etc. and not `1`, `2`, `3`. This will also be improved in
+/// the future.
+///
+/// Valid modifiers are `shift`, `ctrl` (alias: `control`), `alt` (alias: `opt`,
+/// `option`), and `super` (alias: `cmd`, `command`). You may use the modifier
+/// or the alias. When debugging keybinds, the non-aliased modifier will always
+/// be used in output.
+///
+/// Note: The fn or "globe" key on keyboards are not supported as a
+/// modifier. This is a limitation of the operating systems and GUI toolkits
+/// that Ghostty uses.
+///
+/// Some additional notes for triggers:
 ///
 ///   * modifiers cannot repeat, `ctrl+ctrl+a` is invalid.
 ///
@@ -782,15 +810,6 @@ class: ?[:0]const u8 = null,
 ///     physical key mapping rather than a logical one. A physical key
 ///     mapping responds to the hardware keycode and not the keycode
 ///     translated by any system keyboard layouts. Example: "ctrl+physical:a"
-///
-/// Valid modifiers are `shift`, `ctrl` (alias: `control`), `alt` (alias: `opt`,
-/// `option`), and `super` (alias: `cmd`, `command`). You may use the modifier
-/// or the alias. When debugging keybinds, the non-aliased modifier will always
-/// be used in output.
-///
-/// Note: The fn or "globe" key on keyboards are not supported as a
-/// modifier. This is a limitation of the operating systems and GUI toolkits
-/// that Ghostty uses.
 ///
 /// You may also specify multiple triggers separated by `>` to require a
 /// sequence of triggers to activate the action. For example,
@@ -1191,7 +1210,7 @@ keybind: Keybinds = .{},
 
 /// If true, when there are multiple split panes, the mouse selects the pane
 /// that is focused. This only applies to the currently focused window; i.e.
-/// mousing over a split in an unfocused window will now focus that split
+/// mousing over a split in an unfocused window will not focus that split
 /// and bring the window to front.
 ///
 /// Default is false.
@@ -1304,9 +1323,13 @@ keybind: Keybinds = .{},
 /// This configuration can only be set via CLI arguments.
 @"config-default-files": bool = true,
 
-/// Confirms that a surface should be closed before closing it. This defaults to
-/// true. If set to false, surfaces will close without any confirmation.
-@"confirm-close-surface": bool = true,
+/// Confirms that a surface should be closed before closing it.
+///
+/// This defaults to `true`. If set to `false`, surfaces will close without
+/// any confirmation. This can also be set to `always`, which will always
+/// confirm closing a surface, even if shell integration says a process isn't
+/// running.
+@"confirm-close-surface": ConfirmCloseSurface = .true,
 
 /// Whether or not to quit after the last surface is closed.
 ///
@@ -1380,6 +1403,9 @@ keybind: Keybinds = .{},
 ///   * `center` - Terminal appears at the center of the screen.
 ///
 /// Changing this configuration requires restarting Ghostty completely.
+///
+/// Note: There is no default keybind for toggling the quick terminal.
+/// To enable this feature, bind the `toggle_quick_terminal` action to a key.
 @"quick-terminal-position": QuickTerminalPosition = .top,
 
 /// The screen where the quick terminal should show up.
@@ -1812,7 +1838,7 @@ keybind: Keybinds = .{},
 ///
 /// If `false`, each new ghostty process will launch a separate application.
 ///
-/// The default value is `detect` which will default to `true` if Ghostty
+/// The default value is `desktop` which will default to `true` if Ghostty
 /// detects that it was launched from the `.desktop` file such as an app
 /// launcher (like Gnome Shell)  or by D-Bus activation. If Ghostty is launched
 /// from the command line, it will default to `false`.
@@ -2564,6 +2590,11 @@ pub fn default(alloc_gpa: Allocator) Allocator.Error!Config {
             alloc,
             .{ .key = .{ .translated = .left }, .mods = .{ .super = true } },
             .{ .text = "\\x01" },
+        );
+        try result.keybind.set.put(
+            alloc,
+            .{ .key = .{ .translated = .backspace }, .mods = .{ .super = true } },
+            .{ .esc = "\x15" },
         );
         try result.keybind.set.put(
             alloc,
@@ -3644,6 +3675,15 @@ const Replay = struct {
     fn iterator(slice: []const Replay.Step, dst: *Config) Iterator {
         return .{ .slice = slice, .config = dst };
     }
+};
+
+/// Valid values for confirm-close-surface
+/// c_int because it needs to be extern compatible
+/// If this is changed, you must also update ghostty.h
+pub const ConfirmCloseSurface = enum(c_int) {
+    false,
+    true,
+    always,
 };
 
 /// Valid values for custom-shader-animation
