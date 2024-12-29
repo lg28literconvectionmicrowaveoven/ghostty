@@ -485,7 +485,7 @@ palette: Palette = .{},
 ///
 /// Valid values are:
 ///
-///   * `` (blank)
+///   * ` ` (blank)
 ///   * `true`
 ///   * `false`
 ///
@@ -1148,6 +1148,16 @@ keybind: Keybinds = .{},
 ///
 ///   * `end` - Insert the new tab at the end of the tab list.
 @"window-new-tab-position": WindowNewTabPosition = .current,
+
+/// Background color for the window titlebar. This only takes effect if
+/// window-theme is set to ghostty. Currently only supported in the GTK app
+/// runtime.
+@"window-titlebar-background": ?Color = null,
+
+/// Foreground color for the window titlebar. This only takes effect if
+/// window-theme is set to ghostty. Currently only supported in the GTK app
+/// runtime.
+@"window-titlebar-foreground": ?Color = null,
 
 /// This controls when resize overlays are shown. Resize overlays are a
 /// transient popup that shows the size of the terminal while the surfaces are
