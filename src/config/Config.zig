@@ -679,7 +679,7 @@ command: ?[]const u8 = null,
 /// This is a future planned feature.
 ///
 /// This can be changed at runtime but will only affect new terminal surfaces.
-@"scrollback-limit": u32 = 10_000_000, // 10MB
+@"scrollback-limit": usize = 10_000_000, // 10MB
 
 /// Match a regular expression against the terminal text and associate clicking
 /// it with an action. This can be used to match URLs, file paths, etc. Actions
@@ -1098,7 +1098,7 @@ keybind: Keybinds = .{},
 /// BUG: On Linux with GTK, the calculated window size will not properly take
 /// into account window decorations. As a result, the grid dimensions will not
 /// exactly match this configuration. If window decorations are disabled (see
-/// window-decorations), then this will work as expected.
+/// `window-decoration`), then this will work as expected.
 ///
 /// Windows smaller than 10 wide by 4 high are not allowed.
 @"window-height": u32 = 0,
@@ -1253,6 +1253,15 @@ keybind: Keybinds = .{},
 /// program has bracketed paste mode enabled (a setting set by the running
 /// program, not the terminal emulator).
 @"clipboard-paste-bracketed-safe": bool = true,
+
+/// Enables or disabled title reporting (CSI 21 t). This escape sequence
+/// allows the running program to query the terminal title. This is a common
+/// security issue and is disabled by default.
+///
+/// Warning: This can expose sensitive information at best and enable
+/// arbitrary code execution at worst (with a maliciously crafted title
+/// and a minor amount of user interaction).
+@"title-report": bool = false,
 
 /// The total amount of bytes that can be used for image data (i.e. the Kitty
 /// image protocol) per terminal screen. The maximum value is 4,294,967,295
